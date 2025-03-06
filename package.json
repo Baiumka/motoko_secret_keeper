@@ -14,5 +14,14 @@
   "type": "module",
   "workspaces": [
     "src/testc_frontend"
-  ]
+  ],
+  "dependencies": {
+    "@dfinity/auth-client": "^2.3.0",
+    "bootstrap": "^5.3.3",
+    "idb-keyval": "^6.2.1",
+    "react-bootstrap": "^2.10.9"
+  },
+  "devDependencies": {
+    "@rollup/plugin-wasm": "^6.2.2"
+  }
 }

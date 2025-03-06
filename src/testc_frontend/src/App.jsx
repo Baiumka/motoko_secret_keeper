@@ -1,31 +1,46 @@
-import { useState } from 'react';
-import { testc_backend } from 'declarations/testc_backend';
-
+import UserInfo from './pages/UserInfo';
+import {  UserProvider } from "./context/userContext";
+import { AuthProvider } from "./context/authContext";
+import React from 'react';
 function App() {
-  const [greeting, setGreeting] = useState('');
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    testc_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
-  }
+  /*const try_encrypt = async () => {    
+    if(userActor)
+    {
+      userActor.register("Baiumka").then((newUser) => {
+        console.log("User ", newUser);
+        userActor.addTask("NewTask", "Descrrrrrrr", 2).then((newTask) => {
+        console.log("newTask ", newTask);
+        const service = new CryptoService(userActor);
+        service.encryptWithNoteKey(newTask.id, newTask.descr, newTask.user).then((result) => {
+          console.log(result);
+        });
+      });  
+      });
+    }
+    else
+    {
+      console.warn("UserActor is null");
+    }
+ }*/
 
-  return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
-  );
+    function handleSubmit(event) {
+      event.preventDefault();
+      alert(true);
+      return false;
+    }
+
+
+
+    return (
+      <main>
+        <AuthProvider>
+          <UserProvider>
+            <UserInfo/>
+          </UserProvider>
+        </AuthProvider>
+       </main>
+    );
 }
 
 export default App;
