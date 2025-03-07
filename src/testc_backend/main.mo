@@ -73,15 +73,35 @@ shared({ caller = initializer }) actor class() {
     };       
   };
 
-  public shared (msg) func getUser(): async ?User {       
+  public shared (msg) func userExist(): async Bool {       
     let callerUser = await getUserByPrinc(msg.caller);     
     switch (callerUser) {
       case (?user) 
       {        
-        return ?user;
+        return true;
       };
       case (null) {      
-        return null;
+        return false;
+      };      
+    }
+  };
+
+  public shared (msg) func getUser(password: Text): async User {       
+    let callerUser = await getUserByPrinc(msg.caller);     
+    switch (callerUser) {
+      case (?user) 
+      {        
+        if(password == user.password)
+        {
+          return user;
+        }
+        else
+        {
+          throw Error.reject("Incorrect password.");
+        }
+      };
+      case (null) {      
+        throw Error.reject("User does not exist.");
       };      
     }
   };
@@ -172,6 +192,14 @@ shared({ caller = initializer }) actor class() {
       throw Error.reject("You has no permition");
     };  
     return usersSecrets;
+  };
+
+  public shared (msg) func reset(): async () {
+    if(msg.caller != initializer)
+    {
+      throw Error.reject("You has no permition");
+    };  
+    usersSecrets := Trie.empty();
   };
 
 

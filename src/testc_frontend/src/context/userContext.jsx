@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { AuthContext } from "./authContext";
 import useErrorDialog from '../hooks/useErrorDialog';
+import { useCookies } from "react-cookie";
 
 export const UserContext = createContext();
 
@@ -13,18 +14,37 @@ export const UserProvider = ({ children }) => {
 
   const [isLogin, setIsLogin] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
-  const [username, setUserName] = useState("");
-  const [principal, setPrincipal] = useState("");
+  const [isWaitingPassword, setIsWaitigPassword] = useState(false);
+  const [username, setUserName] = useState(DEFAULT_GUEST_NAME);
+  const [principal, setPrincipal] = useState(DEFAULT_PRINCIPAL);
   const [showError, UserErrorDialog] = useErrorDialog();
+  const [cookies, setCookie, removeCookie] = useCookies(["password"]);
 
 
   useEffect(() => {
     async function fetchUser()  {
-      if (authActor) {
-        await getUserInfo();
-      } else {
-        fillEmptyUser();
-      }
+      if (authActor) {        
+        authActor.userExist().then((exist) => {        
+          if(exist)
+          {
+            if(!cookies.password)
+            {
+              setIsWaitigPassword(true);
+            }
+            else
+            {              
+              getUserInfo(cookies.password);
+            }
+          }
+          else
+          {
+              setIsNewUser(true);
+          }     
+        })
+        .catch((error) => {      
+          showError(error.message);
+        });           
+      } 
     };
   
     fetchUser();
@@ -33,31 +53,43 @@ export const UserProvider = ({ children }) => {
   const fillEmptyUser = () => {
     setIsLogin(false);
     setIsNewUser(false);
+    setIsWaitigPassword(false);
     setUserName(DEFAULT_GUEST_NAME);
     setPrincipal(DEFAULT_PRINCIPAL);
+    removeCookie("password");
   }; 
 
   const fillUser = (newUser) => {
     setIsLogin(true);
     setIsNewUser(false);
+    setIsWaitigPassword(false);
     setUserName(newUser.nickname);
     setPrincipal(newUser.principal.toText());
+    setCookie("password", newUser.password, { path: "/", maxAge: 3600 });
   }; 
 
-  const getUserInfo = async() =>
+  const getUserInfo = async(password) =>
   {
-    authActor.getUser().then((newUser) => {   
-      if (newUser.length === 0) {     
-        setIsNewUser(true);                      
-      } else {             
-        fillUser(newUser[0]);  
-      }
+    authActor.getUser(String(password)).then((newUser) => {        
+      fillUser(newUser);        
     })
     .catch((error) => {      
       showError(error.message);
       fillEmptyUser();
+      logout();
     });     
   };
+
+  const enterPassword = async (password) => {
+    try
+    {
+      await getUserInfo(password);
+    }
+    catch (error)
+    {
+      showError(error);
+    }
+  }; 
 
   const login = async () => {
     try
@@ -73,6 +105,7 @@ export const UserProvider = ({ children }) => {
     try
     {
       await authOut();
+      fillEmptyUser();
     }
     catch (error)
     {
@@ -82,7 +115,7 @@ export const UserProvider = ({ children }) => {
   
   const register = async (newName, newPass) => {        
       authActor.register(newName, newPass).then((newUser) => {   
-        fillUser(newUser); 
+        fillUser(newUser);       
       })
       .catch((error) => {      
         showError(error.message);
@@ -92,7 +125,7 @@ export const UserProvider = ({ children }) => {
 
 
   return (
-    <UserContext.Provider value={{isLogin, username, principal, login, logout, register, isNewUser, UserErrorDialog }}>
+    <UserContext.Provider value={{isLogin, username, principal, login, logout, register, isNewUser, UserErrorDialog, isWaitingPassword, enterPassword }}>
       {children}      
     </UserContext.Provider>
     
