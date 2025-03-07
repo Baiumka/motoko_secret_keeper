@@ -14,6 +14,7 @@ import Hex "./Hex";
 import RBTree "mo:base/RBTree";
 import Trie "mo:base/Trie";
 import List "mo:base/List";
+import Prelude "mo:base/Prelude";
 
 shared({ caller = initializer }) actor class() {
   
@@ -106,7 +107,7 @@ shared({ caller = initializer }) actor class() {
     }
   };
 
-  public shared (msg) func addSecret(title: Text, web: Text, descr: Text, content: SecretType): async Secret
+  public shared (msg) func addSecret(password: Text, title: Text, web: Text, descr: Text, content: SecretType): async Secret
   {
     let callerUser = await getUserByPrinc(msg.caller);     
     switch (callerUser) {
@@ -117,18 +118,106 @@ shared({ caller = initializer }) actor class() {
           {
             case (?list)
             {
-              let newSecret: Secret = 
+              if(password == user.password)
               {
-                id = secretIdCounter;
-                title = title;
-                web = web;
-                descr = descr;     
-                content = content; 
-              };
-              secretIdCounter += 1;
-              let updatedList = List.push<Secret>(newSecret, list);                
-              usersSecrets := Trie.put(usersSecrets, key user, userEqual, updatedList).0;
-              return newSecret;
+                let newSecret: Secret = 
+                {
+                  id = secretIdCounter;
+                  title = title;
+                  web = web;
+                  descr = descr;     
+                  content = content; 
+                };
+                secretIdCounter += 1;
+                let updatedList = List.push<Secret>(newSecret, list);                  
+                usersSecrets := Trie.put(usersSecrets, key user, userEqual, updatedList).0;
+                return newSecret;
+              }
+              else
+              {
+                throw Error.reject("Wrong password");
+              }              
+            };
+            case (null)
+            {
+              throw Error.reject("User does not exist.");
+            };
+          }                    
+      };
+      case (null) {      
+        throw Error.reject("User does not exist.");
+      };      
+    }
+  };
+
+  public shared (msg) func updateSecret(password: Text, id: Nat, title: Text, web: Text, descr: Text, content: SecretType): async ()
+  {
+    let callerUser = await getUserByPrinc(msg.caller);     
+    switch (callerUser) {
+      case (?user) 
+      {                
+          var secretList: ?List<Secret> = Trie.get(usersSecrets, key user, userEqual);
+          switch(secretList)
+          {
+            case (?list)
+            {              
+              if(password == user.password)
+              {                            
+                let updatedList:List<Secret> = List.map<Secret, Secret>(
+                  list,
+                  func(secret) {
+                    if (secret.id == id) {
+                      {                
+                        id = secret.id;
+                        title = title;
+                        descr = descr;
+                        web = web;
+                        content = content;
+                      };
+                    } else {
+                      secret;
+                    };
+                  }
+                );              
+                usersSecrets := Trie.put(usersSecrets, key user, userEqual, updatedList).0;                 
+              }
+              else
+              {
+                throw Error.reject("Wrong password");
+              }              
+            };
+            case (null)
+            {
+              throw Error.reject("User does not exist.");
+            };
+          }                    
+      };
+      case (null) {      
+        throw Error.reject("User does not exist.");
+      };      
+    }
+  };
+
+  public shared (msg) func deleteSecret(password: Text, id: Nat): async ()
+  {
+    let callerUser = await getUserByPrinc(msg.caller);     
+    switch (callerUser) {
+      case (?user) 
+      {                
+          var secretList: ?List<Secret> = Trie.get(usersSecrets, key user, userEqual);
+          switch(secretList)
+          {
+            case (?list)
+            {
+              if(password == user.password)
+              {
+                let updatedList = List.filter<Secret>(list, func n { n.id != id });
+                usersSecrets := Trie.put(usersSecrets, key user, userEqual, updatedList).0;
+              }
+              else
+              {
+                throw Error.reject("Wrong password");
+              }              
             };
             case (null)
             {
@@ -163,7 +252,7 @@ shared({ caller = initializer }) actor class() {
     return userList;
   };
 
-  public shared (msg) func getCallerSecrets(): async List<Secret> {
+  public shared (msg) func getCallerSecrets(password: Text): async [Secret] {
     let callerUser = await getUserByPrinc(msg.caller);  
     switch (callerUser) {
       case (?user) 
@@ -172,7 +261,14 @@ shared({ caller = initializer }) actor class() {
         switch (secretList) {
           case (?list) 
           {  
-            return list;
+            if(password == user.password)
+            {
+              return List.toArray(list);
+            }
+            else
+            {
+              throw Error.reject("Wrong password");
+            }
           };
           case (null) {      
             throw Error.reject("User does not exist.");
@@ -184,7 +280,6 @@ shared({ caller = initializer }) actor class() {
       };        
     }
   };
-
 
   public shared (msg) func getSecrets(): async UserSecret {
     if(msg.caller != initializer)

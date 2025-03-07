@@ -1,6 +1,7 @@
-import UserInfo from './pages/UserInfo';
-import {  UserProvider } from "./context/userContext";
+import MainPage from './pages/MainPage';
+import { UserProvider } from "./context/userContext";
 import { AuthProvider } from "./context/authContext";
+import { SecretProvider } from "./context/secretContext";
 import React from 'react';
 function App() {
 
@@ -23,20 +24,13 @@ function App() {
       console.warn("UserActor is null");
     }
  }*/
-
-    function handleSubmit(event) {
-      event.preventDefault();
-      alert(true);
-      return false;
-    }
-
-
-
     return (
       <main>
         <AuthProvider>
-          <UserProvider>
-            <UserInfo/>
+          <UserProvider>            
+            <SecretProvider>
+              <MainPage/>  
+            </SecretProvider>
           </UserProvider>
         </AuthProvider>
        </main>

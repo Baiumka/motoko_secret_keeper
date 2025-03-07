@@ -2,9 +2,9 @@
 
 .user-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  justify-content: center;  
+  height: fit-content;
+  min-height: 100vh;
   background: linear-gradient(135deg, #74ebd5, #acb6e5);
   font-family: 'Poppins', sans-serif;
 }
@@ -14,9 +14,16 @@
   padding: 2rem;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  width: 700px;
-  font-family: 'Roboto', sans-serif;
+  text-align: center;  
+  font-family: 'Roboto', sans-serif;  
+  width: fit-content;  
+}
+
+.logo
+{
+  max-width: 300px;  
+  vertical-align: center;
+  margin-top: 10px;
 }
 
 .user-title {
@@ -27,10 +34,14 @@
 }
 
 .user-info {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 400;
   margin: 0.5rem 0;
-  color: #555;
+  color: #555;  
+}
+
+.user-princ {
+  font-size: 0.8rem;    
 }
 
 .user-info span {
@@ -65,4 +76,53 @@
 
 .logout-btn:hover {
   background: #a71d2a;
+}
+
+.container {
+  font-family: 'Poppins', sans-serif;
+}
+
+.card {
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin  : 10px;
+  height: 200px;
+  max-width: 600px;
+}
+.big {
+  align-items: 'center';
+  justify-content: center;  
+  font-size: 10rem;
+}
+
+.card h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.card p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.btn {
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.modal-content {
+  border-radius: 15px;
+}
+
+.modal-title {
+  font-weight: 600;
+}
+
+.form-control {
+  border-radius: 8px;
 }

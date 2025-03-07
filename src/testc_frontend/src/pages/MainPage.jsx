@@ -2,9 +2,9 @@ import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../context/userContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NicknameModal, {MODE_REGISTER, MODE_LOGIN} from "../comps/NicknameModal";
+import SecretsList from './SecretsList';
 
-
-function UserInfo() {
+function MainPage() {
   const { login, logout, isLogin, username, principal, isNewUser, register, UserErrorDialog, isWaitingPassword, enterPassword } = useContext(UserContext);    
   const handleLogin = async () => {
     try
@@ -73,15 +73,18 @@ function UserInfo() {
         </div>
           <h2 className="user-title">Password Keeper</h2>
           <p className="user-info">Username: <span>{username}</span></p>
-          <p className="user-info">Principal: <span>{principal}</span></p>
+          <p className="user-info user-princ">Principal: <span>{principal}</span></p>
           {isLogin ? (
             <button className="btn logout-btn" onClick={handleLogout}>Logout</button>
           ) : (
             <button className="btn login-btn" onClick={handleLogin}>Login</button>
           )}
-        </div>       
+          <img className="logo col" src="/logo2.svg" alt="DFINITY logo"/>
+        </div>  
+        <SecretsList/>             
     </div>
+    
   );
 }
 
-export default UserInfo;
+export default MainPage;
