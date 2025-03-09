@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { AuthContext } from "./authContext";
 import useErrorDialog from '../hooks/useErrorDialog';
 import { useCookies } from "react-cookie";
-//import {CryptoService} from '../utils/crypto';
+import {CryptoService} from '../utils/crypto';
 //import * as vetkd from 'ic-vetkd-utils';
 
 export const UserContext = createContext();
@@ -27,7 +27,7 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     async function fetchUser()  {
-      if (authActor) {        
+      if (authActor) {               
         authActor.userExist().then((exist) => {        
           if(exist)
           {
@@ -63,13 +63,17 @@ export const UserProvider = ({ children }) => {
     removeCookie("password");
   }; 
 
-  const fillUser = (newUser) => {
+  const fillUser = async (newUser) => {
     setIsLogin(true);
     setIsNewUser(false);
     setIsWaitigPassword(false);
     setUserName(newUser.nickname);
     setPrincipal(newUser.principal.toText());
     setCookie("password", newUser.password, { path: "/", maxAge: 3600 });
+
+    const service = new CryptoService(authActor);     
+    const encryptedData = await service.encryptWithNoteKey(1, principal, "secret_word");
+    console.log(encryptedData);
   }; 
 
   const getUserInfo = async(password) =>

@@ -1,4 +1,4 @@
-/*import { get, set } from 'idb-keyval';
+import { get, set } from 'idb-keyval';
 import {ActorSubclass} from "@dfinity/agent";
 import {_SERVICE} from '../../../declarations/testc_backend/testc_backend.did.js';
 import * as vetkd from "ic-vetkd-utils";
@@ -123,4 +123,3 @@ function bigintTo128BitBigEndianUint8Array(bn: bigint): Uint8Array {
 
   return u8;
 }
-*/

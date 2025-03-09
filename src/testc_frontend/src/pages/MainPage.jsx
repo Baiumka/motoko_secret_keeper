@@ -4,8 +4,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import NicknameModal, {MODE_REGISTER, MODE_LOGIN} from "../comps/NicknameModal";
 import SecretsList from './SecretsList';
 
+
 function MainPage() {
   const { login, logout, isLogin, username, principal, isNewUser, register, UserErrorDialog, isWaitingPassword, enterPassword } = useContext(UserContext);    
+
+  useEffect(() => {//main  
+      checkAuth();
+    }, []);
+
 
   const handleLogin = async (authType) => {
     try

@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
 
   async function checkAuth() {      
     await checkII(); 
-    await checkPlug();
+    //await checkPlug();
     
   };
 

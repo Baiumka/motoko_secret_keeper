@@ -14,6 +14,7 @@ import Hex "./Hex";
 import RBTree "mo:base/RBTree";
 import Trie "mo:base/Trie";
 import List "mo:base/List";
+import Iter "mo:base/Iter";
 import Prelude "mo:base/Prelude";
 
 shared({ caller = initializer }) actor class() {
@@ -48,9 +49,13 @@ shared({ caller = initializer }) actor class() {
     content: SecretType;
   };
 
-  stable var usersSecrets: UserSecret = Trie.empty();
-  stable var userIdCounter: Nat = 1;
-  stable var secretIdCounter: Nat = 1;
+  var usersSecrets: UserSecret = Trie.empty();
+  var userIdCounter: Nat = 1;
+  var secretIdCounter: Nat = 1;
+
+  stable var usersSecretsStable: UserSecret = Trie.empty();
+  stable var userIdCounterStable: Nat = 1;
+  stable var secretIdCounterStable: Nat = 1;
 
   public shared (msg) func register(nickname: Text, password: Text): async User {
     let callerUser = await getUserByPrinc(msg.caller);
@@ -354,6 +359,24 @@ shared({ caller = initializer }) actor class() {
             Nat8.fromIntWrap(n / 2 ** shift);
         };
         Array.tabulate<Nat8>(len, ith_byte);
+    };
+
+    system func preupgrade() {
+        Debug.print("Starting pre-upgrade hook...");
+        usersSecretsStable := usersSecrets;
+        userIdCounterStable := userIdCounter;
+        secretIdCounterStable := secretIdCounter;
+        Debug.print("pre-upgrade finished.");
+    };
+
+   
+    system func postupgrade() {
+        Debug.print("Starting post-upgrade hook...");
+        usersSecrets := usersSecretsStable;
+        userIdCounter := userIdCounterStable;
+        secretIdCounter := secretIdCounterStable;
+        usersSecretsStable:=Trie.empty();
+        Debug.print("post-upgrade finished.");
     };
   
 
