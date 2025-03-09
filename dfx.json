@@ -3,14 +3,23 @@
   "internet-identity": {
       "type": "pull",
       "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+    },    
+    "vetkd_system_api": {
+      "candid": "vetkd_system_api.did",
+      "type": "custom",
+      "wasm": "vetkd_system_api.wasm"
     },
     "testc_backend": {
       "main": "src/testc_backend/main.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": [
+        "vetkd_system_api"
+      ]
     },
     "testc_frontend": {
       "dependencies": [
-        "testc_backend"
+        "testc_backend",
+        "vetkd_system_api"
       ],
       "source": [
         "src/testc_frontend/dist"

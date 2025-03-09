@@ -18,12 +18,17 @@
   "dependencies": {
     "@dfinity/auth-client": "^2.3.0",
     "bootstrap": "^5.3.3",
+    "ic-auth": "^0.9.1",
+    "ic-stoic-identity": "^6.0.0",
+    "ic-vetkd-utils": "^0.3.0",
     "idb-keyval": "^6.2.1",
     "react-bootstrap": "^2.10.9",
     "react-cookie": "^7.2.2",
     "universal-cookie": "^7.2.2"
   },
   "devDependencies": {
-    "@rollup/plugin-wasm": "^6.2.2"
+    "@rollup/plugin-wasm": "^6.2.2",
+    "vite-plugin-top-level-await": "^1.5.0",
+    "vite-plugin-wasm": "^3.4.1"
   }
 }

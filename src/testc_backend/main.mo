@@ -299,9 +299,9 @@ shared({ caller = initializer }) actor class() {
 
 
   
-};
 
-   /* type VETKD_SYSTEM_API = actor {
+
+   type VETKD_SYSTEM_API = actor {
         vetkd_public_key : ({
             canister_id : ?Principal;
             derivation_path : [Blob];
@@ -317,7 +317,7 @@ shared({ caller = initializer }) actor class() {
 
     let vetkd_system_api : VETKD_SYSTEM_API = actor ("s55qq-oqaaa-aaaaa-aaakq-cai");
 
-    public shared ({ caller }) func symmetric_key_verification_key_for_note() : async Blob {
+    public shared ({ caller }) func app_vetkd_public_key() : async Blob {
         let { public_key } = await vetkd_system_api.vetkd_public_key({
             canister_id = null;
             derivation_path = Array.make(Text.encodeUtf8("note_symmetric_key"));
@@ -326,17 +326,13 @@ shared({ caller = initializer }) actor class() {
         public_key;
     };
 
-    public shared ({ caller }) func encrypted_symmetric_key_for_note(note_id : Nat, encryption_public_key : Blob) : async Text {
+    public shared ({ caller }) func encrypted_symmetric_key_for_caller(encryption_public_key : Blob) : async Text {
                 
-        let caller_text = Principal.toText(caller);
-        let needNote = Array.find<Task>(tasks, func (task) = task.user == caller_text and task.id == note_iuserKeyd);
-        switch(needNote)
-        {
-          case (?note)
-          {
+        let caller_text = Principal.toText(caller);        
+        let NOTE_ID = 1;
             let buf = Buffer.Buffer<Nat8>(32);
-            buf.append(Buffer.fromArray(natToBigEndianByteArray(16, note.id)));
-            buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(note.user))));// HERE must be owner
+            buf.append(Buffer.fromArray(natToBigEndianByteArray(16, NOTE_ID)));
+            buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(caller_text))));// HERE must be owner
             let derivation_id = Blob.fromArray(Buffer.toArray(buf)); 
 
             let { encrypted_key } = await vetkd_system_api.vetkd_derive_encrypted_key({
@@ -346,12 +342,7 @@ shared({ caller = initializer }) actor class() {
                 encryption_public_key;
             });
             Hex.encode(Blob.toArray(encrypted_key));
-          };
-          case (null)
-        {
-          throw Error.reject("Not found "); 
-        };
-        };
+        
         
     };
 
@@ -364,5 +355,6 @@ shared({ caller = initializer }) actor class() {
         };
         Array.tabulate<Nat8>(len, ith_byte);
     };
-  */
+  
 
+};

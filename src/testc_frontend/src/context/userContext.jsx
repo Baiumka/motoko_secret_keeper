@@ -2,6 +2,8 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { AuthContext } from "./authContext";
 import useErrorDialog from '../hooks/useErrorDialog';
 import { useCookies } from "react-cookie";
+//import {CryptoService} from '../utils/crypto';
+//import * as vetkd from 'ic-vetkd-utils';
 
 export const UserContext = createContext();
 
@@ -10,7 +12,7 @@ const DEFAULT_PRINCIPAL = "xxxx-xxxx-xxxx-xxxx";
 
 export const UserProvider = ({ children }) => {
   
-  const {authActor, makeAuth, authOut} = useContext(AuthContext);  
+  const {authActor, LoginStoic, LoginII, LoginNFID, LoginPlug, authOut} = useContext(AuthContext);  
 
   const [isLogin, setIsLogin] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
@@ -19,6 +21,8 @@ export const UserProvider = ({ children }) => {
   const [principal, setPrincipal] = useState(DEFAULT_PRINCIPAL);
   const [showError, UserErrorDialog] = useErrorDialog();
   const [cookies, setCookie, removeCookie] = useCookies(["password"]);
+
+
 
 
   useEffect(() => {
@@ -42,7 +46,7 @@ export const UserProvider = ({ children }) => {
           }     
         })
         .catch((error) => {      
-          showError(error.message);
+          showError("Fethicng user data error: " + error);
         });           
       } 
     };
@@ -91,10 +95,30 @@ export const UserProvider = ({ children }) => {
     }
   }; 
 
-  const login = async () => {
+  const login = async (authType) => {
+    console.log("lpgin", authType);
     try
     {
-      await makeAuth();
+      switch(authType)
+      {
+        case "ii":
+          await LoginII();
+          break;
+        case "nfid":
+          await LoginNFID();
+          break;
+        case "Stoic":
+          await LoginStoic();
+          break;
+        case "plug":
+          console.log("LoginPlug");
+          await LoginPlug();
+          console.log("LoginPlugEND");
+          break;
+        default:
+          showError("Unknown login type");
+      }
+      
     }
     catch (error)
     {

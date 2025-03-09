@@ -14,7 +14,7 @@ export const SecretProvider = ({ children }) => {
 
   useEffect(() => {
       async function getSecrets()  {
-        console.log("getSecrets");
+        console.log("getSecrets", isLogin);
         if (isLogin) {        
           console.log("fix login ", cookies.password);
           authActor.getCallerSecrets(String(cookies.password)).then((secrets) => {  

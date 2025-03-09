@@ -6,10 +6,13 @@ import SecretsList from './SecretsList';
 
 function MainPage() {
   const { login, logout, isLogin, username, principal, isNewUser, register, UserErrorDialog, isWaitingPassword, enterPassword } = useContext(UserContext);    
-  const handleLogin = async () => {
+
+  const handleLogin = async (authType) => {
     try
     {
-      await login();      
+      console.log("start login");
+      await login(authType);      
+      console.log("end login");
     }
     catch (e)
     {
@@ -77,7 +80,12 @@ function MainPage() {
           {isLogin ? (
             <button className="btn logout-btn" onClick={handleLogout}>Logout</button>
           ) : (
-            <button className="btn login-btn" onClick={handleLogin}>Login</button>
+            <div>
+            <button className="btn login-btn" onClick={() => handleLogin("ii")}>Login (Interntet Identity)</button>
+            <button className="btn login-btn" onClick={() => handleLogin("plug")}>Login (Plug Wallet)</button>
+            <button className="btn login-btn" onClick={() => handleLogin("nfid")}>Login (NFID)</button>
+            <button className="btn login-btn" onClick={() => handleLogin("Stoic")}>Login (Stoic)</button>
+            </div>
           )}
           <img className="logo col" src="/logo2.svg" alt="DFINITY logo"/>
         </div>  

@@ -1,12 +1,7 @@
 /*import { get, set } from 'idb-keyval';
-
 import {ActorSubclass} from "@dfinity/agent";
-
-// Usage of the imported bindings only works if the respective .wasm was loaded, which is done in main.ts.
-// See also https://github.com/rollup/plugins/tree/master/packages/wasm#using-with-wasm-bindgen-and-wasm-pack
-import * as vetkd from "../../vetkd_user_lib/ic_vetkd_utils.js";
-import {_SERVICE} from '../declarations/testc_backend/testc_backend.did.js';
-import vetkd_wasm from "../../vetkd_user_lib/ic_vetkd_utils_bg.wasm";
+import {_SERVICE} from '../../../declarations/testc_backend/testc_backend.did.js';
+import * as vetkd from "ic-vetkd-utils";
 
 type BackendActor = ActorSubclass<_SERVICE>;
 export class CryptoService {
@@ -17,7 +12,7 @@ export class CryptoService {
   // The function encrypts data with the note-id-specific secretKey.
   public async encryptWithNoteKey(note_id: bigint, owner: string, data: string) {
     console.log(note_id);
-    await vetkd.default(await vetkd_wasm);
+    
     console.log(owner);
     console.log(data);
     
