@@ -8,6 +8,19 @@ function NicknameModal({ show, handleClose, handleReg, handleLogin, mode }) {
         const [nickname, setNickname] = useState("");
         const [password, setPassword] = useState("");
       
+        const handleOk = async () => {
+          setPassword("");
+          if(mode == MODE_REGISTER)
+          {
+            handleReg(nickname, password);
+          }
+          else
+          {
+            handleLogin(password);
+          }           
+        };
+        
+
         return (
           <Modal show={show} onHide={handleClose} centered>
             <Modal.Header closeButton>
@@ -41,7 +54,7 @@ function NicknameModal({ show, handleClose, handleReg, handleLogin, mode }) {
               </Form>
             </Modal.Body>
             <Modal.Footer>              
-              <Button variant="success" onClick={mode == MODE_REGISTER ? ( () =>handleReg(nickname, password)) : (() => handleLogin(password))}>
+              <Button variant="success" onClick={handleOk}>
                 Confirm
               </Button>
             </Modal.Footer>

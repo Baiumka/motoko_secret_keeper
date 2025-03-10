@@ -1,9 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { AuthContext } from "./authContext";
 import useErrorDialog from '../hooks/useErrorDialog';
-import { useCookies } from "react-cookie";
-import {CryptoService} from '../utils/crypto';
-import * as vetkd from 'ic-vetkd-utils';
+
 
 export const UserContext = createContext();
 
@@ -17,28 +15,18 @@ export const UserProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
   const [isWaitingPassword, setIsWaitigPassword] = useState(false);
+  const [passwordPromise, setPasswordPromise] = useState(null);
   const [username, setUserName] = useState(DEFAULT_GUEST_NAME);
   const [principal, setPrincipal] = useState(DEFAULT_PRINCIPAL);
   const [showError, UserErrorDialog] = useErrorDialog();
-  const [cookies, setCookie, removeCookie] = useCookies(["password"]);
-
-
-
 
   useEffect(() => {
     async function fetchUser()  {
-      if (authActor) {               
-        authActor.userExist().then((exist) => {        
+      if (authActor) {                    
+        authActor.userExist().then(async (exist) => {        
           if(exist)
-          {
-            if(!cookies.password)
-            {
-              setIsWaitigPassword(true);
-            }
-            else
-            {              
-              getUserInfo(cookies.password);
-            }
+          {              
+              await getUserInfo();
           }
           else
           {
@@ -59,8 +47,7 @@ export const UserProvider = ({ children }) => {
     setIsNewUser(false);
     setIsWaitigPassword(false);
     setUserName(DEFAULT_GUEST_NAME);
-    setPrincipal(DEFAULT_PRINCIPAL);
-    removeCookie("password");
+    setPrincipal(DEFAULT_PRINCIPAL);    
   }; 
 
   const fillUser = async (newUser) => {
@@ -68,18 +55,13 @@ export const UserProvider = ({ children }) => {
     setIsNewUser(false);
     setIsWaitigPassword(false);
     setUserName(newUser.nickname);
-    setPrincipal(newUser.principal.toText());
-    setCookie("password", newUser.password, { path: "/", maxAge: 3600 });
-
-    const service = new CryptoService(authActor);     
-    const encryptedData = await service.encryptWithNoteKey(1, principal, "secret_word");
-    console.log(encryptedData);
+    setPrincipal(newUser.principal.toText());    
   }; 
 
-  const getUserInfo = async(password) =>
-  {
-    authActor.getUser(String(password)).then((newUser) => {        
-      fillUser(newUser);        
+  const getUserInfo = async() =>
+  {        
+    authActor.getUser().then((newUser) => {        
+      fillUser(newUser); 
     })
     .catch((error) => {      
       showError(error.message);
@@ -90,8 +72,13 @@ export const UserProvider = ({ children }) => {
 
   const enterPassword = async (password) => {
     try
-    {
-      await getUserInfo(password);
+    {            
+      if (passwordPromise) {
+        passwordPromise(password);
+        setIsWaitigPassword(false);
+        setPasswordPromise(null);
+      }
+      
     }
     catch (error)
     {
@@ -99,6 +86,13 @@ export const UserProvider = ({ children }) => {
     }
   }; 
 
+  const requestPassword = () => {
+    return new Promise((resolve) => {
+      setPasswordPromise(() => resolve);
+      setIsWaitigPassword(true);
+    });
+  };
+  
   const login = async (authType) => {
     console.log("lpgin", authType);
     try
@@ -141,7 +135,7 @@ export const UserProvider = ({ children }) => {
     }
   }; 
   
-  const register = async (newName, newPass) => {        
+  const register = async (newName, newPass) => {              
       authActor.register(newName, newPass).then((newUser) => {   
         fillUser(newUser);       
       })
@@ -153,7 +147,7 @@ export const UserProvider = ({ children }) => {
 
 
   return (
-    <UserContext.Provider value={{isLogin, username, principal, login, logout, register, isNewUser, UserErrorDialog, isWaitingPassword, enterPassword, cookies }}>
+    <UserContext.Provider value={{isLogin, username, principal, login, logout, register, isNewUser, UserErrorDialog, isWaitingPassword, enterPassword, requestPassword }}>
       {children}      
     </UserContext.Provider>
     

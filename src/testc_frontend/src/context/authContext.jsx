@@ -150,11 +150,8 @@ export const AuthProvider = ({ children }) => {
         else
         {
           console.error("Have not info abount agent or identity.");
-        }
-         
-                      
-        setUserActor(newActor);           
-        console.log("Actor created", newActor);         
+        }                               
+        setUserActor(newActor);                   
     } 
     catch (e)
     {

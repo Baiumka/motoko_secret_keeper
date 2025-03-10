@@ -10,13 +10,8 @@ export class CryptoService {
   }
 
   // The function encrypts data with the note-id-specific secretKey.
-  public async encryptWithNoteKey(note_id: bigint, owner: string, data: string) {
-    console.log(note_id);
-    
-    console.log(owner);
-    console.log(data);
-    
-    await this.fetch_note_key_if_needed(note_id, owner);
+  public async encrypt(password:string, note_id: bigint, owner: string, data: string) {    
+    await this.fetch_note_key_if_needed(password,note_id, owner);
     const note_key: CryptoKey = await get([note_id.toString(), owner]) as CryptoKey;
 
     const data_encoded = Uint8Array.from([...data].map(ch => ch.charCodeAt(0))).buffer
@@ -37,14 +32,15 @@ export class CryptoService {
   }
 
   // The function decrypts the given input data with the note-id-specific secretKey.
-  public async decryptWithNoteKey(note_id: bigint, owner: string, data: string) {
-    await this.fetch_note_key_if_needed(note_id, owner);
+  public async decrypt(password:string, note_id: bigint, owner: string, data: string) {
+    await this.fetch_note_key_if_needed(password,note_id, owner);
     const note_key: CryptoKey = await get([note_id.toString(), owner]) as CryptoKey;
     
 
     if (data.length < 13) {
       throw new Error('wrong encoding, too short to contain iv');
     }
+    
     const iv_decoded = data.slice(0, 12);
     const cipher_decoded = data.slice(12);
     const iv_encoded = Uint8Array.from([...iv_decoded].map(ch => ch.charCodeAt(0))).buffer;
@@ -59,19 +55,17 @@ export class CryptoService {
       ciphertext_encoded
     );
     const decrypted_data_decoded = String.fromCharCode(...new Uint8Array(decrypted_data_encoded));
+    console.log(decrypted_data_decoded);
     return decrypted_data_decoded;
   }
 
-  private async fetch_note_key_if_needed(note_id: bigint, owner: string) {
+  private async fetch_note_key_if_needed(password:string, note_id: bigint, owner: string) {
     if (!await get([note_id.toString(), owner])) {
-      const seed = window.crypto.getRandomValues(new Uint8Array(32));
-      console.log("VETKD Module:", vetkd);
-      console.log("seed:", seed);
+      const seed = window.crypto.getRandomValues(new Uint8Array(32));      
       const tsk = new vetkd.TransportSecretKey(seed);
-      console.log("VETKD tsk:", tsk);
       
-      const ek_bytes_hex = await this.actor.encrypted_symmetric_key_for_caller(tsk.public_key());
-      const pk_bytes_hex = await this.actor.app_vetkd_public_key();
+      const ek_bytes_hex = await this.actor.encrypted_symmetric_key_for_caller(password, note_id, tsk.public_key());
+      const pk_bytes_hex = await this.actor.app_vetkd_public_key(password);
 
       const note_id_bytes: Uint8Array = bigintTo128BitBigEndianUint8Array(note_id);
       const owner_utf8: Uint8Array = new TextEncoder().encode(owner);

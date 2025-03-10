@@ -7,7 +7,7 @@ import SecretCard from '../comps/secretCard';
 import {Row, Col} from 'react-bootstrap';
 
 function SecretsList() {
-  const { SecretErrorDialog, secrets, deleteSecret, updateSecret, addSecret } = useContext(SecretContext);    
+  const { SecretErrorDialog, secrets, deleteSecret, updateSecret, addSecret, showSecret } = useContext(SecretContext);    
   const {isLogin}  = useContext(UserContext);   
   const [isShowAdd,  setShowAdd] = useState(false);
   const [editedSecret,  setEditedSecret] = useState(null);
@@ -43,6 +43,12 @@ function SecretsList() {
     setShowAdd(false);    
   };
 
+  const handlerShowClick = async (secret) => {        
+    await showSecret(secret);    
+  };
+
+
+
   return (
     <div className="container align-items-center">
       {isLogin ? (
@@ -57,7 +63,8 @@ function SecretsList() {
               <SecretCard
                 secret={secret}
                 handleDelete={handelDelete}
-                handleEdit={handleEditClick}/>
+                handleEdit={handleEditClick}
+                handleShow={handlerShowClick}/>
               </Col>
             ))}
           </Row>

@@ -1,14 +1,9 @@
 import { useContext, useState, useEffect } from 'react';
 
-function SecretCard({secret, handleDelete, handleEdit}) {   
-    const [showPassword, setShowPassword] = useState(false);
-      
-    const toggleShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
+function SecretCard({secret, handleDelete, handleEdit, handleShow}) {   
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(secret.content);
+        navigator.clipboard.writeText(secret.decrypt);
     };
 
     const handleDeleteClick = () => {
@@ -17,6 +12,10 @@ function SecretCard({secret, handleDelete, handleEdit}) {
 
     const handleEditClick = () => {
         handleEdit(secret);
+    };
+
+    const handleShowClick = () => {
+        handleShow(secret);
     };
 
   return (
@@ -31,9 +30,17 @@ function SecretCard({secret, handleDelete, handleEdit}) {
         <p><strong>Description:</strong> {secret.descr}</p>
         <p>
           <strong>Password:</strong>
-          <span className="mx-2">{showPassword ? secret.content : '••••••••'}</span>
-          <button variant="outline-secondary" size="sm" onClick={toggleShowPassword}>👁</button>
-          <button variant="outline-success" size="sm" className="ms-2" onClick={copyToClipboard}>📋</button>
+          <span className="mx-2">
+          {secret.decrypt ? (
+            <div>
+                <p>{secret.decrypt}</p>
+                <button variant="outline-success" size="sm" className="ms-2" onClick={copyToClipboard}>COPY</button>
+                </div>
+            ) 
+            : (<button variant="outline-secondary" size="sm" onClick={handleShowClick}>Look secret</button>)}
+          </span>
+          
+          
         </p>
       </div>       
 

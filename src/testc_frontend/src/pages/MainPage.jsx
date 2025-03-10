@@ -3,11 +3,11 @@ import { UserContext } from '../context/userContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import NicknameModal, {MODE_REGISTER, MODE_LOGIN} from "../comps/NicknameModal";
 import SecretsList from './SecretsList';
-
+import useErrorDialog from '../hooks/useErrorDialog';
 
 function MainPage() {
   const { login, logout, isLogin, username, principal, isNewUser, register, UserErrorDialog, isWaitingPassword, enterPassword } = useContext(UserContext);    
-
+  const [showError, ErrorDialog] = useErrorDialog();
   const handleLogin = async (authType) => {
     try
     {
@@ -74,6 +74,7 @@ function MainPage() {
             mode ={MODE_REGISTER}
           />
           {UserErrorDialog}
+          {ErrorDialog}
         </div>
           <h2 className="user-title">Password Keeper</h2>
           <p className="user-info">Username: <span>{username}</span></p>

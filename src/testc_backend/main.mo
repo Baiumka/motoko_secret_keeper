@@ -22,8 +22,6 @@ shared({ caller = initializer }) actor class() {
   private type List<T> = ?(T, List<T>);
   private type Trie<K, V> = Trie.Trie<K, V>;
   private type Key<K> = Trie.Key<K>;   
-  private type Password = Text;
-  private type Phrase = [Text];
   private type UserSecret = Trie<User, List<Secret>>;
   
   type User = {
@@ -32,21 +30,22 @@ shared({ caller = initializer }) actor class() {
     password: Text;
     principal: Principal;      
   };
+
+  type PublicUser = {
+    id: Nat;
+    nickname: Text;    
+    principal: Principal;      
+  };
+
   private func userEqual(u1 : User, u2 : User) : Bool { u1.principal == u2.principal };
   private func key(u: User) : Key<User> { { hash = Text.hash(Principal.toText(u.principal)); key = u } };
 
-  type SecretType = {
-    #Text : Text;
-    #Password : Password;
-    #Phrase : Phrase;
-  };
-  
   type Secret = {
     id: Nat;
     title: Text;
     web: Text;
     descr: Text;
-    content: SecretType;
+    content: Text;
   };
 
   var usersSecrets: UserSecret = Trie.empty();
@@ -92,19 +91,18 @@ shared({ caller = initializer }) actor class() {
     }
   };
 
-  public shared (msg) func getUser(password: Text): async User {       
+  public shared (msg) func getUser(): async PublicUser {       
     let callerUser = await getUserByPrinc(msg.caller);     
     switch (callerUser) {
       case (?user) 
-      {        
-        if(password == user.password)
+      {           
+        let publicUser: PublicUser =
         {
-          return user;
-        }
-        else
-        {
-          throw Error.reject("Incorrect password.");
-        }
+          id = user.id;
+          nickname = user.nickname;
+          principal = user.principal;
+        };    
+        return publicUser;              
       };
       case (null) {      
         throw Error.reject("User does not exist.");
@@ -112,7 +110,11 @@ shared({ caller = initializer }) actor class() {
     }
   };
 
-  public shared (msg) func addSecret(password: Text, title: Text, web: Text, descr: Text, content: SecretType): async Secret
+  public query func getNextId(): async (Nat) {       
+    return secretIdCounter;
+  };
+
+  public shared (msg) func addSecret(password: Text, title: Text, web: Text, descr: Text, content: Text): async Secret
   {
     let callerUser = await getUserByPrinc(msg.caller);     
     switch (callerUser) {
@@ -155,7 +157,7 @@ shared({ caller = initializer }) actor class() {
     }
   };
 
-  public shared (msg) func updateSecret(password: Text, id: Nat, title: Text, web: Text, descr: Text, content: SecretType): async ()
+  public shared (msg) func updateSecret(password: Text, id: Nat, title: Text, web: Text, descr: Text): async ()
   {
     let callerUser = await getUserByPrinc(msg.caller);     
     switch (callerUser) {
@@ -177,7 +179,7 @@ shared({ caller = initializer }) actor class() {
                         title = title;
                         descr = descr;
                         web = web;
-                        content = content;
+                        content = secret.content;
                       };
                     } else {
                       secret;
@@ -243,6 +245,11 @@ shared({ caller = initializer }) actor class() {
         }
     };
     return null;  
+  };
+
+  public shared (msg) func whoami(): async Text
+  {
+    return Principal.toText(msg.caller);
   };
 
   public shared (msg) func getUsers(): async List<User> {
@@ -322,31 +329,65 @@ shared({ caller = initializer }) actor class() {
 
     let vetkd_system_api : VETKD_SYSTEM_API = actor ("s55qq-oqaaa-aaaaa-aaakq-cai");
 
-    public shared ({ caller }) func app_vetkd_public_key() : async Blob {
-        let { public_key } = await vetkd_system_api.vetkd_public_key({
-            canister_id = null;
-            derivation_path = Array.make(Text.encodeUtf8("note_symmetric_key"));
-            key_id = { curve = #bls12_381_g2; name = "test_key_1" };
-        });
-        public_key;
+    public shared ({ caller }) func app_vetkd_public_key(password: Text) : async Blob {
+      let callerUser = await getUserByPrinc(caller);        
+        switch(callerUser)
+        {
+          case (?user)
+          {
+            if(user.password == password)
+            {
+            let { public_key } = await vetkd_system_api.vetkd_public_key({
+                canister_id = null;
+                derivation_path = Array.make(Text.encodeUtf8("note_symmetric_key"#user.password));
+                key_id = { curve = #bls12_381_g2; name = "test_key_1" };
+            });
+            return public_key;
+            }
+            else
+            {
+              throw Error.reject("Incorrect password.");
+            }
+          };
+          case (null)
+          {
+            throw Error.reject("User does not exist.");
+          }
+        };
     };
 
-    public shared ({ caller }) func encrypted_symmetric_key_for_caller(encryption_public_key : Blob) : async Text {
-                
-        let caller_text = Principal.toText(caller);        
-        let NOTE_ID = 1;
+    public shared ({ caller }) func encrypted_symmetric_key_for_caller(password: Text, secretID: Nat, encryption_public_key : Blob) : async Text {
+        let callerUser = await getUserByPrinc(caller);        
+        switch(callerUser)
+        {
+          case (?user)
+          {
+            if(user.password == password)
+            {
+            let caller_text = Principal.toText(caller);                
             let buf = Buffer.Buffer<Nat8>(32);
-            buf.append(Buffer.fromArray(natToBigEndianByteArray(16, NOTE_ID)));
+            buf.append(Buffer.fromArray(natToBigEndianByteArray(16, secretID)));
             buf.append(Buffer.fromArray(Blob.toArray(Text.encodeUtf8(caller_text))));// HERE must be owner
             let derivation_id = Blob.fromArray(Buffer.toArray(buf)); 
 
             let { encrypted_key } = await vetkd_system_api.vetkd_derive_encrypted_key({
                 derivation_id;
-                derivation_path = Array.make(Text.encodeUtf8("note_symmetric_key"));
-                key_id = { curve = #bls12_381_g2; name = "test_key_1" };
+                derivation_path = Array.make(Text.encodeUtf8("note_symmetric_key"#user.password));
+                key_id = { curve = #bls12_381_g2; name = "test_key_1"};
                 encryption_public_key;
             });
-            Hex.encode(Blob.toArray(encrypted_key));
+            return Hex.encode(Blob.toArray(encrypted_key));
+            }
+            else
+            {
+              throw Error.reject("Incorrect password.");
+            }
+          };
+          case (null)
+          {
+            throw Error.reject("User does not exist.");
+          }
+        };
         
         
     };
