@@ -70,8 +70,8 @@ export class CryptoService {
       const tsk = new vetkd.TransportSecretKey(seed);
       console.log("VETKD tsk:", tsk);
       
-      const ek_bytes_hex = await this.actor.encrypted_symmetric_key_for_note(note_id, tsk.public_key());
-      const pk_bytes_hex = await this.actor.symmetric_key_verification_key_for_note();
+      const ek_bytes_hex = await this.actor.encrypted_symmetric_key_for_caller(tsk.public_key());
+      const pk_bytes_hex = await this.actor.app_vetkd_public_key();
 
       const note_id_bytes: Uint8Array = bigintTo128BitBigEndianUint8Array(note_id);
       const owner_utf8: Uint8Array = new TextEncoder().encode(owner);

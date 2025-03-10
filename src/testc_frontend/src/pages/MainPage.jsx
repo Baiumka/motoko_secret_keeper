@@ -8,11 +8,6 @@ import SecretsList from './SecretsList';
 function MainPage() {
   const { login, logout, isLogin, username, principal, isNewUser, register, UserErrorDialog, isWaitingPassword, enterPassword } = useContext(UserContext);    
 
-  useEffect(() => {//main  
-      checkAuth();
-    }, []);
-
-
   const handleLogin = async (authType) => {
     try
     {

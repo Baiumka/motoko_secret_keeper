@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   async function checkAuth() {      
+    //authOut();
     await checkII(); 
     //await checkPlug();
     
@@ -165,11 +166,8 @@ export const AuthProvider = ({ children }) => {
 
 
   const authOut = async () => {
-    if(provider == "ii")
-    {
-      const authClient = await AuthClient.create();   
-      await authClient.logout();   
-    }         
+    const authClient = await AuthClient.create();   
+    await authClient.logout();          
     setUserActor(null);             
   };
 
