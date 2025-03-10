@@ -2,8 +2,8 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { AuthContext } from "./authContext";
 import useErrorDialog from '../hooks/useErrorDialog';
 import { useCookies } from "react-cookie";
-//import {CryptoService} from '../utils/crypto';
-//import * as vetkd from 'ic-vetkd-utils';
+import {CryptoService} from '../utils/crypto';
+import * as vetkd from 'ic-vetkd-utils';
 
 export const UserContext = createContext();
 
@@ -71,9 +71,9 @@ export const UserProvider = ({ children }) => {
     setPrincipal(newUser.principal.toText());
     setCookie("password", newUser.password, { path: "/", maxAge: 3600 });
 
-    //const service = new CryptoService(authActor);     
-    //const encryptedData = await service.encryptWithNoteKey(1, principal, "secret_word");
-    //console.log(encryptedData);
+    const service = new CryptoService(authActor);     
+    const encryptedData = await service.encryptWithNoteKey(1, principal, "secret_word");
+    console.log(encryptedData);
   }; 
 
   const getUserInfo = async(password) =>

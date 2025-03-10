@@ -2,21 +2,25 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.scss';
-/*import vetkd from "ic-vetkd-utils";
-import vetkdWasmUrl from "ic-vetkd-utils/ic_vetkd_utils_bg.wasm?url";
+import vetkd from "ic-vetkd-utils";
 
 async function initVetkd() {
-  console.log("Loading WASM from:", vetkdWasmUrl);
-  console.log("vetkd:", vetkd);
-  const wasmResponse = await fetch(vetkdWasmUrl);
-  const wasmBuffer = await wasmResponse.arrayBuffer();
-  const wasmModule = await WebAssembly.instantiate(wasmBuffer, { wbg: vetkd });
+  const response = await fetch("/ic_vetkd_utils_bg.wasm");
+  const wasmBuffer = await response.arrayBuffer();
 
-  console.log("WASM Module:", wasmModule);
+  const imports = {
+    wbg: vetkd, 
+  };
+
+  const wasmModule = await WebAssembly.instantiate(wasmBuffer, imports);
+  console.log("WASM module exports:", wasmModule.instance.exports);
+
   await vetkd(wasmModule.instance);
 }
 
-initVetkd();*/
+initVetkd();
+
+initVetkd();
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
