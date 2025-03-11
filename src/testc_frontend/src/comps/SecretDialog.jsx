@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Nav, Row, Col } from "react-bootstrap";
 
-function SecretDialog({ show, handleClose, handleSave, editedSecret }) {
+function SecretDialog({ show, handleClose, handleSave, editedSecret, isLoading }) {
   const [title, setTitle] = useState("");
   const [web, setWeb] = useState("");  
   const [descr, setDescr] = useState("");
    // Ensure it's an array to start with
   const [content, setContent] = useState([""]); 
   const [contentType, setContentType] = useState('Password'); // Default to password
-
+  
   useEffect(() => {
     if (editedSecret) {
       setTitle(editedSecret.title);
@@ -186,7 +186,7 @@ function SecretDialog({ show, handleClose, handleSave, editedSecret }) {
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>Cancel</Button>
-        <Button variant="primary" onClick={handleOk}>Save</Button>
+        <Button variant="primary" onClick={handleOk}>{isLoading ? <img src="/loading.gif" className='mini-gif'/> : "Save"}</Button>
       </Modal.Footer>
     </Modal>
   );

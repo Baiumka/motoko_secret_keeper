@@ -19,6 +19,12 @@
   width: fit-content;  
 }
 
+.mini-gif {
+  width: 25px;
+  height: 25px;
+}
+
+
 .logo
 {
   max-width: 300px;  
@@ -29,14 +35,14 @@
 .user-title {
   font-size: 1.8rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.2rem;
   color: #333;
 }
 
 .user-info {
   font-size: 1.2rem;
   font-weight: 400;
-  margin: 0.5rem 0;
+  margin: 0.2rem 0;
   color: #555;  
 }
 

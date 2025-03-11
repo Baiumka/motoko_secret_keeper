@@ -19,7 +19,7 @@ export const UserProvider = ({ children }) => {
   const [username, setUserName] = useState(DEFAULT_GUEST_NAME);
   const [principal, setPrincipal] = useState(DEFAULT_PRINCIPAL);
   const [showError, UserErrorDialog] = useErrorDialog();
-
+ 
   useEffect(() => {
     async function fetchUser()  {
       if (authActor) {                    
@@ -94,7 +94,6 @@ export const UserProvider = ({ children }) => {
   };
   
   const login = async (authType) => {
-    console.log("lpgin", authType);
     try
     {
       switch(authType)
@@ -109,9 +108,7 @@ export const UserProvider = ({ children }) => {
           await LoginStoic();
           break;
         case "plug":
-          console.log("LoginPlug");
           await LoginPlug();
-          console.log("LoginPlugEND");
           break;
         default:
           showError("Unknown login type");

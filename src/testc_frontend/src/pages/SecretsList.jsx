@@ -11,8 +11,10 @@ function SecretsList() {
   const {isLogin}  = useContext(UserContext);   
   const [isShowAdd,  setShowAdd] = useState(false);
   const [editedSecret,  setEditedSecret] = useState(null);
+  const [isLoadingAdd, setIsLoadingAdd] = useState(false);
 
   const handlerSaveSecret = async (newSecret) => {    
+    setIsLoadingAdd(true);
     if(!editedSecret)
     {
       await addSecret(newSecret);    
@@ -22,6 +24,7 @@ function SecretsList() {
       await updateSecret(newSecret);    
     }
     handleCloseClick();
+    setIsLoadingAdd(false);
   };
 
   const handelDelete = async (secretID) => {        
@@ -73,7 +76,8 @@ function SecretsList() {
             show={isShowAdd}
             handleClose={handleCloseClick}
             handleSave={handlerSaveSecret}     
-            editedSecret={editedSecret}           
+            editedSecret={editedSecret}     
+            isLoading={isLoadingAdd}      
         />
       </div>) : (<div></div>)}
     {SecretErrorDialog}        

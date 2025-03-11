@@ -8,16 +8,22 @@ import useErrorDialog from '../hooks/useErrorDialog';
 function MainPage() {
   const { login, logout, isLogin, username, principal, isNewUser, register, UserErrorDialog, isWaitingPassword, enterPassword } = useContext(UserContext);    
   const [showError, ErrorDialog] = useErrorDialog();
+  
+  const [isLoginLoading, setLoginLoading] = useState(false);
+  
   const handleLogin = async (authType) => {
     try
     {
-      console.log("start login");
-      await login(authType);      
-      console.log("end login");
+      setLoginLoading(true);      
+      await login(authType);          
     }
     catch (e)
     {
       showError(e);
+    }
+    finally
+    {
+      setLoginLoading(false);
     }
   };
 
@@ -83,10 +89,14 @@ function MainPage() {
             <button className="btn logout-btn" onClick={handleLogout}>Logout</button>
           ) : (
             <div>
-            <button className="btn login-btn" onClick={() => handleLogin("ii")}>Login (Interntet Identity)</button>
-            <button className="btn login-btn" onClick={() => handleLogin("plug")}>Login (Plug Wallet)</button>
-            <button className="btn login-btn" onClick={() => handleLogin("nfid")}>Login (NFID)</button>
-            <button className="btn login-btn" onClick={() => handleLogin("Stoic")}>Login (Stoic)</button>
+            {isLoginLoading ? (<img src="/loading.gif"/>) : (
+              <div>
+                <button className="btn login-btn" onClick={() => handleLogin("ii")}>Login (Interntet Identity)</button>
+                <button className="btn login-btn" onClick={() => handleLogin("plug")}>Login (Plug Wallet)</button>
+                <button className="btn login-btn" onClick={() => handleLogin("nfid")}>Login (NFID)</button>
+                <button className="btn login-btn" onClick={() => handleLogin("Stoic")}>Login (Stoic)</button>
+              </div>
+          )}
             </div>
           )}
           <img className="logo col" src="/logo2.svg" alt="DFINITY logo"/>

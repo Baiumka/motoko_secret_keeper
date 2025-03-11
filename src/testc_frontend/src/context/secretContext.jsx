@@ -4,7 +4,6 @@ import { UserContext } from "./userContext";
 import useErrorDialog from '../hooks/useErrorDialog';
 import defaultSecrets from "../utils/defaultSecrets";
 import {CryptoService} from '../utils/crypto';
-import { decrypt } from "dotenv";
 
 export const SecretContext = createContext();
 export const SecretProvider = ({ children }) => {
@@ -17,12 +16,9 @@ export const SecretProvider = ({ children }) => {
 
   useEffect(() => {
       async function getSecrets()  {
-        console.log("getSecrets", isLogin);
         if (isLogin) {                  
           const password = await requestPassword();
-          console.log("fix login ", password);
-          authActor.getCallerSecrets(String(password)).then(async(secrets) => {  
-              console.log("Secrets",secrets);                    
+          authActor.getCallerSecrets(String(password)).then(async(secrets) => {                 
               setSecrets(secrets);
               SetCryptoService(new CryptoService(authActor));              
           })
@@ -52,7 +48,6 @@ export const SecretProvider = ({ children }) => {
           String(newSecret.descr), 
           encryptContent)
         .then((addedSecret) => {        
-          console.log("Added: ", addedSecret);     
           setSecrets([addedSecret, ...secrets]);    
           resolve(addedSecret);  
         })
@@ -66,16 +61,9 @@ export const SecretProvider = ({ children }) => {
 
   const showSecret = async (secret) => {
     return new Promise(async (resolve, reject) => {
-
-      //const kek = await cryptoService.encrypt(2, principal, "1234567890ab13");
-      //console.log(kek);
-      //const kek2 = await cryptoService.decrypt(2, principal, kek);
-      //console.log(kek2);   
-
       try {
         const password = await requestPassword();
         const decryptedSecret = await cryptoService.decrypt(password, secret.id, principal, secret.content);
-        console.log("Decrypted Secret:", decryptedSecret);
 
         setSecrets((prevSecrets) =>
           prevSecrets.map((s) =>
@@ -84,7 +72,6 @@ export const SecretProvider = ({ children }) => {
         );
         resolve();
       } catch (error) {
-        console.error("Decryption error:", error);
         reject(error);
       }
     });
@@ -95,7 +82,6 @@ export const SecretProvider = ({ children }) => {
       return new Promise(async(resolve, reject) => {
         const password = await requestPassword();
         authActor.deleteSecret(String(password), secretID).then(() => {        
-          console.log("Success delete. ");   
           setSecrets(secrets.filter(secret => secret.id !== secretID));     
           resolve(true);  
         })
@@ -116,8 +102,7 @@ export const SecretProvider = ({ children }) => {
             String(newSecret.title), 
             String(newSecret.web), 
             String(newSecret.descr))
-          .then(() => {        
-            console.log("Updated secret: ", newSecret);     
+          .then(() => {           
             setSecrets(oldSecret => 
               oldSecret.map(secret => 
                 secret.id === newSecret.id ? {...secret, ...newSecret} : secret

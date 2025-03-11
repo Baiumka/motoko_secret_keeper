@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }) => {
 
   async function checkII() {           
     if(!provider) {
-      console.log("Checking II");
       const authClient = await AuthClient.create();
       if(authClient)
       {            
@@ -45,7 +44,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   async function checkAuth() {      
-    //authOut();
     await checkII(); 
     //await checkPlug();
     
@@ -75,13 +73,10 @@ export const AuthProvider = ({ children }) => {
   const LoginPlug = async()  => {    
       if(authActor) return;        
       return new Promise(async(resolve, reject) => { 
-        console.log("Start request connect");
         await window.ic.plug.requestConnect({canisterId});
-        console.log("Start request agent");
         const agent = window.ic.plug.agent;            
         setProvider("plug");    
         await getActorUser({agent: agent});
-        console.log("agent", agent);  
         resolve(agent);    
     });
   }
@@ -117,16 +112,13 @@ export const AuthProvider = ({ children }) => {
             onSuccess: async () => {       
                 try {
                     await getActorUser({identity: authClient.getIdentity()});
-                    console.log("Auth login success");
                     setProvider("ii");    
                     resolve();  // Сообщаем, что логин завершился
                 } catch (error) {
-                    console.error("Error in getActorUser:", error);
                     reject(error);
                 }
             },
             onError: (err) => {
-                console.error("Auth failed:", err);
                 reject(err);
             }
         });
